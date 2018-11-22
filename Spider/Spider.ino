@@ -1533,9 +1533,9 @@ void OUI_NON(boolean OUI) {
   
 void configurer(int position) {
   for (int arm = 0; arm < 4; arm++) {
-    Bouge_un_membre(Num_Sortie, positions[position][arm].A);
-    Bouge_un_membre(Num_Sortie, positions[position][arm].B);
-    Bouge_un_membre(Num_Sortie, positions[position][arm].C);
+    Bouge_un_membre(servos[arm * 3].pin, positions[position][arm].A);
+    Bouge_un_membre(servos[arm * 3 + 1].pin, positions[position][arm].B);
+    Bouge_un_membre(servos[arm * 3 + 2].pin, positions[position][arm].C);
   }
 }
        

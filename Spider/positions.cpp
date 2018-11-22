@@ -1,5 +1,24 @@
-
+#include <Arduino.h>
 #include "positions.h"
+
+
+
+SERVO servos[12] = {  
+  {0,  120, 600, 0}, // leg A (front right) 
+  {1,  120, 600, 0}, 
+  {2,  120, 550, 0}, 
+  {4,  120, 540, 0}, // leg B (back right)
+  {5,  120, 560, 0},
+  {6,  120, 580, 0},
+  {8,  120, 590, 0}, // leg C (front left)
+  {9,  120, 580, 0},
+  {10, 120, 580, 0},
+  {12, 120, 580, 0}, // Leg D (back left)
+  {13, 200, 540, 0},
+  {14, 120, 580, 0}
+};
+
+
 const LEG_POSITION positions[17][4] = {
   // 00 ------------- Tableau de configuration STABLE Raisonnable. (000) -------------- 
   {{305,  213,  307}, {274,  406,  314}, {287,  215,  319}, {285,  388,  314}},
