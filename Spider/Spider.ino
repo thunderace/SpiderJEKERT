@@ -125,8 +125,10 @@ Ajouté la stabilisation gyroscopique                   29464 Octets (95%)    80
 
 #include <avr/eeprom.h> // Bibliothèque intégrée à l'IDE qui gère les entiers ,les réels ...
 #include <Adafruit_PWMServoDriver.h>
-
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#include "positions.h"
+
 
 #define Lecture_Adresse 0x41  //"A" en hexadécimal correspond à une commande pour le capteur Magnétique.
 //--------------- Déclarations pour le module inertiel MPU6050 --------------
@@ -304,7 +306,7 @@ void setup() {
   SAV_Consigne.reserve(LGR_chaine); // Reserve LGR_chaine octets pour la chaine.
   pwm.begin(); // Initialise le module multiplexeur  
   pwm.setPWMFreq(50);  // Fréquence de la PWM : En standard 50Hz pour des servomoteurs.   
-  CONFIGURER(192); // Impératif pour initialiser la table des positions actuelles. (VEILLE.)
+  configurer(8); // Impératif pour initialiser la table des positions actuelles. (VEILLE.)
 } 
   
 void loop() {
@@ -552,10 +554,10 @@ void Traite_Programme() {
             Tourne_a_gauche(); 
             break;
           case  7 : 
-            Decaler_lateralement(360); 
+            Decaler_lateralement(15); 
             break; // Décale latéralement à Droite.
           case  8 : 
-            Decaler_lateralement(384); 
+            Decaler_lateralement(16); 
             break; // Décale latéralement à Gauche.
           case 10 : 
             Hauteur_Maximale(); 
@@ -573,7 +575,7 @@ void Traite_Programme() {
             Libere_efforts(); 
             break;
           case 15 : 
-            CONFIGURER(48); 
+            configurer(2); 
             break; // Tous les moteurs au neutre opérationnel.
           case 16 : 
             Configuration_Stable_Raisonnable(); 
@@ -594,7 +596,7 @@ void Traite_Programme() {
             Depose_la_sonde(); 
             break;
           case 22 : 
-            CONFIGURER(96); 
+            configurer(4); 
             break; // Configuration Atterrissage.
           case 23 : 
             Configure_pour_Decollage(); 
@@ -916,12 +918,12 @@ void Configuration_stable_LASER() {
     Avance_Recule_Jambe(true, 'D'); 
     delay(100); 
   }
-  Coordonne(216); // Patte A en configuration de pointage.
+  Coordonne(9); // Patte A en configuration de pointage.
 } 
   
 void Retour_de_configuration_LASER() {
   Posture_LASER = false;
-  CONFIGURER(240); 
+  configurer(10); 
   delay(300); // Configuration LASER jambe A ramenée au stable transversal.
   for (byte Nb = 1; Nb < 6; Nb++) {
     Avance_Recule_Jambe(false, 'D'); 
@@ -1066,8 +1068,10 @@ void Bouge_pour_un_balayage_en_torsion() {
 
 //============================== Routines pour les programmes "pNN*" =================================
 void Aff_TXT_EEPROM_et_CRLF(int PTR,byte LGR) {
+  /*
   Aff_TEXTE_EEPROM(PTR,LGR); 
   Serial.println();
+  */
 }
 
 void Configure_pour_Decollage() {
@@ -1078,8 +1082,8 @@ void Configure_pour_Decollage() {
     Attendre_une_chaine(); 
     if (Chaine_Memorisee == "o*") {
       Compteur_caracteres = 4; 
-      Coordonne(72); 
-      CONFIGURER(72);
+      Coordonne(3); 
+      configurer(3);
     } else {
       BIP();
     }
@@ -1116,13 +1120,15 @@ void  Enregistrement_de_la_posture_Actuelle_en_EEPROM() {
 }
        
 void Utilise_la_posture_sauvegardee_en_EEPROM() {
+  /*
   Coordonne(408); 
-  CONFIGURER(408);
+  configurer(408);
+  */
 }
   
 void Depose_la_sonde() {
   if (Contact_avec_le_sol()) {
-    CONFIGURER(48); // Tous les moteurs au neutre opérationnel.
+    configurer(2); // Tous les moteurs au neutre opérationnel.
     delay(1000); 
     Passer_en_VEILLE(); 
     delay(1000); 
@@ -1133,31 +1139,31 @@ void Depose_la_sonde() {
 }
 
 void Retour_de_hauteur_maximale() {
-  Coordonne(288); 
+  Coordonne(12); 
   REVEILLER();
 }
   
 void Configuration_Stable_Raisonnable() {
   Coordonne(0); 
-  CONFIGURER(0); 
+  configurer(0); 
   Libere_efforts();
 }
   
 void Config_Stable_Raisonnable_vers_VEILLE() {
-  Coordonne(120); 
-  Coordonne(192); 
+  Coordonne(5); 
+  Coordonne(8); 
 }
    
 void Hauteur_Maximale() {
-  Coordonne(288); 
+  Coordonne(12); 
   delay(300); 
-  Coordonne(144);
+  Coordonne(6);
 }
 
 void Reculer_un_pas() {
   Recule_paire(false); 
   Recule_paire(true); 
-  Coordonne(168); 
+  Coordonne(7); 
   Recule_paire(false); 
   Recule_paire(true); 
   Configurer_stable_transversal();
@@ -1169,7 +1175,7 @@ void Avancer_un_pas() { // Anticollision par télémètre à ultrasons.
   if (Distance > 8) {
     Avance_paire(false); 
     Avance_paire(true); 
-    Coordonne(264);
+    Coordonne(11);
     Avance_paire(false); 
     Avance_paire(true); 
     Configurer_stable_transversal();
@@ -1181,7 +1187,7 @@ void Avancer_un_pas() { // Anticollision par télémètre à ultrasons.
   
 void Decaler_lateralement(int Posture) {
   Passer_en_VEILLE(); 
-  CONFIGURER(96); 
+  configurer(4); 
   delay(500); 
   Coordonne(Posture);
   REVEILLER(); // En réalité relève la sonde et la stabilise.
@@ -1190,7 +1196,7 @@ void Decaler_lateralement(int Posture) {
 void Tourne_a_droite() {
   Avance_paire(true); 
   Recule_paire(false); 
-  Coordonne(312); // Fait tourner.
+  Coordonne(13); // Fait tourner.
   Recule_paire(false); 
   Avance_paire(true); 
   Configurer_stable_transversal(); 
@@ -1199,7 +1205,7 @@ void Tourne_a_droite() {
 void Tourne_a_gauche() {
   Avance_paire(false); 
   Recule_paire(true); 
-  Coordonne(336); // Fait tourner.
+  Coordonne(14); // Fait tourner.
   Avance_paire(false); 
   Recule_paire(true); 
   Configurer_stable_transversal(); 
@@ -1419,17 +1425,17 @@ void Etat_actuel_de_la_sonde() {
 }
   
 void REVEILLER() {
-  Coordonne(120); 
+  Coordonne(5); 
   Configurer_stable_transversal(); 
   Libere_efforts();
 }
 
 void Configurer_stable_transversal() {
-  CONFIGURER(120);
+  configurer(5);
 }
   
 void Passer_en_VEILLE() {
-  Coordonne(192);
+  Coordonne(8);
 }
   
 void Analyseur_syntaxique() {
@@ -1525,9 +1531,11 @@ void OUI_NON(boolean OUI) {
   }
 }
   
-void CONFIGURER(int PTR_TABLE) {
-  for (Num_Sortie = 0; Num_Sortie < 12; Num_Sortie++) {
-    Bouge_un_membre(Num_Sortie, Lire_un_Entier_en_EEPROM(PTR_TABLE)); PTR_TABLE++; PTR_TABLE++;
+void configurer(int position) {
+  for (int arm = 0; arm < 4; arm++) {
+    Bouge_un_membre(Num_Sortie, positions[position][arm].A);
+    Bouge_un_membre(Num_Sortie, positions[position][arm].B);
+    Bouge_un_membre(Num_Sortie, positions[position][arm].C);
   }
 }
        
@@ -1550,10 +1558,12 @@ void Ecrire_un_Entier_en_EEPROM(int ADRESSE, int MOT16Bits) { // Pointe l'octet 
 }
 
 void Aff_TEXTE_EEPROM(int PTR, byte Longueur) {
+/*  
   for (byte I=0; I<Longueur; I++) {
     Serial.print(char(Lire_un_OCTET_en_EEPROM(PTR))); 
     PTR++;
-  } 
+  }
+*/
 }
        
 void Attendre_une_chaine() {// Cette procédure attend une chaine sur la ligne USB.
